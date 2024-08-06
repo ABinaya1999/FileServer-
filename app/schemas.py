@@ -1,10 +1,18 @@
-from fastapi.openapi.models import Schema
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 
-class UserSchema(Schema):
-    email: str
+class UserCreate(BaseModel):
+    email: EmailStr
     password: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: EmailStr
+
+    class Config:
+        from_attributes = True
 
 
 class PostBase(BaseModel):
@@ -13,8 +21,13 @@ class PostBase(BaseModel):
     published_at: bool = True
 
 
-class CreatePost(PostBase):
+class PostCreate(PostBase):
     pass
 
-class UpdatePost(PostBase):
-    pass
+
+class PostResponse(PostBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

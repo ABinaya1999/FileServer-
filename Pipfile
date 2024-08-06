@@ -9,6 +9,7 @@ uvicorn = {extras = ["standard"], version = "*"}
 sqlalchemy = "*"
 python-dotenv = "*"
 psycopg2-binary = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
 
 [dev-packages]
 

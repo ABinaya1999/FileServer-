@@ -5,6 +5,7 @@ from sqlalchemy.sql.expression import text
 
 
 class User(Base):
+
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, nullable=False)
