@@ -1,32 +1,40 @@
-from fastapi import FastAPI, File, UploadFile, Depends
+from fastapi import FastAPI, File, UploadFile, Depends, status
 import datetime
 from typing import List
 from pathlib import Path
 from fastapi.responses import JSONResponse, FileResponse
-import psycopg2
-from psycopg2.extras import RealDictCursor
 from . import models
-from .database import engine, SessionLocal
+from .database import engine, get_db
 from sqlalchemy.orm import Session
+from .schemas import PostBase
+
+models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
-while True:
-    try:
-        connect = psycopg2.connect(
-            host="localhost",
-            database="FastAPI",
-            user="postgres",
-            password="P@rajuli17",
-            cursor_factory=RealDictCursor
-        )
-        cursor = connect.cursor()
-        print("Database connection success")
-        break
-    except Exception as e:
-        print("Error:", e)
 
-# @app.post("/users", status_code=status.HTTP_201_CREATED)
-# def create_user(db: Session = Depends(get_db)):
+@app.get("/post", status_code=status.HTTP_200_OK)
+def get_post(db: Session = Depends(get_db)):
+    post = db.query(models.Post).all()
+    return {"data": post}
+
+
+@app.post("/post", status_code=status.HTTP_201_CREATED)
+def create_post(post: PostBase, db: Session = Depends(get_db)):
+    new_post = models.Post(**post.dict())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return {"data": new_post}
+
+
+
+
+
+
+
+
+
+
 
 
 # create directory
@@ -34,7 +42,7 @@ BASE_UPLOAD_DIR = Path("files/")
 BASE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
-@app.post("/file/{directory}/")
+@app.post("/file/{directory}/", status_code=status.HTTP_201_CREATED)
 async def upload_file(directory: str, files: List[UploadFile] = File(...)):
     sub_dir = BASE_UPLOAD_DIR / directory
     sub_dir.mkdir(parents=True, exist_ok=True)
